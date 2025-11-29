@@ -1,19 +1,8 @@
 services:
-  # PostgreSQL Database
-  - type: pserv
-    name: teachtune-db
-    env: docker
-    plan: free
-    region: oregon
-    databases:
-      - name: teachtune
-        databaseName: teachtune
-        user: teachtune
-
   # Backend API
   - type: web
     name: teachtune-backend
-    env: node
+    runtime: node
     plan: free
     region: oregon
     buildCommand: npm install
@@ -24,9 +13,7 @@ services:
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        fromDatabase:
-          name: teachtune
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
@@ -36,7 +23,7 @@ services:
   # Frontend (Static Site)
   - type: web
     name: teachtune-frontend
-    env: static
+    runtime: static
     plan: free
     region: oregon
     buildCommand: npm install && npm run build
@@ -48,4 +35,5 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://teachtune-backend.onrender.com/api
+
 
