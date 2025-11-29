@@ -1,8 +1,7 @@
 import { Aluno, Aula, IAlunoRepository, IAulaRepository } from '../types';
 
 // URL base da API (configurável via variável de ambiente)
-// Fix: Safe access to env to prevent crash if undefined
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Helper para obter token
 function getAuthToken(): string | null {
