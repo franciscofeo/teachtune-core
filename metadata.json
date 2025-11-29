@@ -1,0 +1,5 @@
+{
+  "name": "TeachTune MVP",
+  "description": "Aplicativo de gerenciamento de aulas de música para professores, focado em agenda, presença e repertório.",
+  "requestFramePermissions": []
+}
