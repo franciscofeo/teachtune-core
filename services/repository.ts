@@ -67,25 +67,33 @@ export const AlunoRepository: IAlunoRepository = {
 // --- Aula Repository Implementation (API Client) ---
 export const AulaRepository: IAulaRepository = {
   async agendar(aula: Aula): Promise<void> {
+    console.log('[Repository] agendar - Enviando aula para API:', aula);
+    console.log('[Repository] agendar - Data:', aula.data);
     await apiRequest('/aulas', {
       method: 'POST',
       body: JSON.stringify(aula),
     });
+    console.log('[Repository] agendar - Aula criada com sucesso');
   },
 
   async agendarLote(aulas: Aula[]): Promise<void> {
     if (aulas.length === 0) return;
+    console.log('[Repository] agendarLote - Enviando', aulas.length, 'aulas para API');
     await apiRequest('/aulas/batch', {
       method: 'POST',
       body: JSON.stringify({ aulas }),
     });
+    console.log('[Repository] agendarLote - Lote criado com sucesso');
   },
 
   async atualizar(aula: Aula): Promise<void> {
+    console.log('[Repository] atualizar - Enviando aula para API:', aula);
+    console.log('[Repository] atualizar - Data:', aula.data);
     await apiRequest(`/aulas/${aula.id}`, {
       method: 'PUT',
       body: JSON.stringify(aula),
     });
+    console.log('[Repository] atualizar - Aula atualizada com sucesso');
   },
 
   async deletar(id: string): Promise<void> {
@@ -106,7 +114,13 @@ export const AulaRepository: IAulaRepository = {
       inicio: inicio.toISOString(),
       fim: fim.toISOString(),
     });
-    return apiRequest<Aula[]>(`/aulas?${params.toString()}`);
+    console.log('[Repository] listarPorPeriodo - Buscando aulas entre:', { inicio: inicio.toString(), fim: fim.toString() });
+    const aulas = await apiRequest<Aula[]>(`/aulas?${params.toString()}`);
+    console.log('[Repository] listarPorPeriodo - Recebidas', aulas.length, 'aulas');
+    if (aulas.length > 0) {
+      console.log('[Repository] listarPorPeriodo - Exemplo aula[0]:', aulas[0]);
+    }
+    return aulas;
   },
 
   async listarPorAluno(alunoId: string): Promise<Aula[]> {

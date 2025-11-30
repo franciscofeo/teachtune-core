@@ -181,22 +181,57 @@ export const listarAlunos = async (): Promise<Aluno[]> => {
 
 // Use Case: Agendar Aula Simples (Avulsa)
 export const agendarAula = async (alunoId: string, data: string, anotacoes: string): Promise<Aula> => {
+  console.log('[UseCase] agendarAula - Data recebida do frontend:', data);
+  console.log('[UseCase] agendarAula - Tipo:', typeof data);
+  
+  // Normalizar data para ISO mantendo timezone local
+  // Input datetime-local vem como "YYYY-MM-DDTHH:mm" (sem timezone)
+  // Precisamos garantir que seja tratado como local, não UTC
+  let dataISO: string;
+  if (data.includes('T') && !data.includes('Z') && !data.includes('+')) {
+    // Formato datetime-local sem timezone
+    const localDate = new Date(data);
+    dataISO = localDate.toISOString();
+    console.log('[UseCase] agendarAula - Data local interpretada:', localDate.toString());
+    console.log('[UseCase] agendarAula - Data ISO para banco:', dataISO);
+  } else {
+    dataISO = data;
+    console.log('[UseCase] agendarAula - Data já no formato ISO:', dataISO);
+  }
+  
   const novaAula: Aula = {
     id: generateId(),
     alunoId,
-    data,
+    data: dataISO,
     dataAtualizacao: new Date().toISOString(),
     presente: null,
     anotacoes,
     repertorio: []
   };
+  
+  console.log('[UseCase] agendarAula - Aula a ser criada:', novaAula);
   await AulaRepository.agendar(novaAula);
   return novaAula;
 };
 
 // Use Case: Marcar Presença e Atualizar Detalhes
 export const atualizarAula = async (aula: Aula): Promise<void> => {
-  await AulaRepository.atualizar(aula);
+  console.log('[UseCase] atualizarAula - Aula recebida:', aula);
+  console.log('[UseCase] atualizarAula - Data:', aula.data);
+  
+  // Normalizar data se necessário
+  let aulaAtualizada = { ...aula };
+  if (aula.data && typeof aula.data === 'string') {
+    if (aula.data.includes('T') && !aula.data.includes('Z') && !aula.data.includes('+')) {
+      // Formato datetime-local sem timezone
+      const localDate = new Date(aula.data);
+      aulaAtualizada.data = localDate.toISOString();
+      console.log('[UseCase] atualizarAula - Data convertida de local para ISO:', aulaAtualizada.data);
+    }
+  }
+  
+  console.log('[UseCase] atualizarAula - Enviando para repository:', aulaAtualizada);
+  await AulaRepository.atualizar(aulaAtualizada);
 };
 
 // Use Case: Deletar Aula
@@ -219,7 +254,16 @@ export const listarAgenda = async (inicio?: Date, fim?: Date): Promise<(Aula & {
     end.setDate(end.getDate() + 30);
   }
 
+  console.log('[UseCase] listarAgenda - Período:', { start, end });
   const aulas = await AulaRepository.listarPorPeriodo(start, end);
+  console.log('[UseCase] listarAgenda - Aulas recebidas do backend:', aulas.length);
+  
+  if (aulas.length > 0) {
+    console.log('[UseCase] listarAgenda - Exemplo de aula[0]:', aulas[0]);
+    console.log('[UseCase] listarAgenda - Data da aula[0]:', aulas[0].data);
+    console.log('[UseCase] listarAgenda - new Date(aula[0].data):', new Date(aulas[0].data).toString());
+  }
+  
   const alunos = await AlunoRepository.listar();
 
   return aulas.map(aula => ({

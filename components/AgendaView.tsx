@@ -227,17 +227,24 @@ export const AgendaView: React.FC = () => {
   };
 
   const handleSaveAula = async (dados: any) => {
+    console.log('[AgendaView] handleSaveAula - Dados recebidos do form:', dados);
+    console.log('[AgendaView] handleSaveAula - Data:', dados.data);
+    console.log('[AgendaView] handleSaveAula - Tipo da data:', typeof dados.data);
+    
     try {
       if (selectedAula && selectedAula.id) {
         // Update existing
+        console.log('[AgendaView] handleSaveAula - Atualizando aula existente, ID:', selectedAula.id);
         await atualizarAula({ ...selectedAula, ...dados });
       } else {
         // Create new (Single lesson)
+        console.log('[AgendaView] handleSaveAula - Criando nova aula avulsa');
         await agendarAula(dados.alunoId, dados.data, dados.anotacoes);
       }
       setIsModalOpen(false);
       loadData();
     } catch (err: any) {
+      console.error('[AgendaView] handleSaveAula - Erro:', err);
       alert("Erro ao salvar aula: " + (err.message || "Desconhecido"));
     }
   };
@@ -445,7 +452,11 @@ const AulaListItem: React.FC<{
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            {new Date(aula.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            {(() => {
+              const date = new Date(aula.data);
+              console.log('[AulaListItem] Aula ID:', aula.id, 'Data ISO:', aula.data, 'Date Object:', date.toString(), 'Hora exibida:', date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+              return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            })()}
           </div>
         </div>
         {aula.anotacoes && (
@@ -656,7 +667,11 @@ const LessonModal: React.FC<LessonModalProps> = ({ isOpen, onClose, initialData,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[LessonModal] handleSubmit - formData:', formData);
+    console.log('[LessonModal] handleSubmit - data value:', formData.data);
+    
     // Send datetime-local value directly (browser already has it in local timezone)
+    // Format: "YYYY-MM-DDTHH:mm" (sem timezone)
     onSave({
       ...formData,
       repertorio: formData.repertorioInput.split(',').map(s => s.trim()).filter(Boolean)
