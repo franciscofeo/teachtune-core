@@ -42,7 +42,7 @@ export const DashboardView: React.FC = () => {
     <div className="space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">
-          Olá, {professor ? getPrimeiroNome(professor.nome) : 'Professor'}! 👋
+          Olá, {professor ? getPrimeiroNome(professor.nome) : 'Professor'}!
         </h2>
         <p className="text-gray-500">
           Aqui está o resumo completo com estatísticas, alunos ativos e aulas de hoje.

@@ -34,10 +34,10 @@ const AppContent: React.FC = () => {
   return (
     <Layout currentView={currentView} onViewChange={setCurrentView}>
       <div key={currentView} className="view-transition">
-        {currentView === 'dashboard' && <DashboardView />}
-        {currentView === 'agenda' && <AgendaView />}
-        {currentView === 'students' && <StudentsView />}
-        {currentView === 'history' && <HistoryView />}
+      {currentView === 'dashboard' && <DashboardView />}
+      {currentView === 'agenda' && <AgendaView />}
+      {currentView === 'students' && <StudentsView />}
+      {currentView === 'history' && <HistoryView />}
       </div>
     </Layout>
   );

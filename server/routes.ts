@@ -10,6 +10,24 @@ router.use(authMiddleware);
 
 // --- Helpers de Mapeamento ---
 
+// Helper para garantir que repertorio seja JSON válido
+const normalizeRepertorio = (repertorio: any): string => {
+  if (Array.isArray(repertorio)) {
+    return JSON.stringify(repertorio);
+  }
+  if (typeof repertorio === 'string' && repertorio.trim() !== '') {
+    // Se for string, tenta parsear como JSON
+    try {
+      const parsed = JSON.parse(repertorio);
+      return JSON.stringify(Array.isArray(parsed) ? parsed : [parsed]);
+    } catch {
+      // Se não for JSON, trata como item único
+      return JSON.stringify([repertorio]);
+    }
+  }
+  return JSON.stringify([]);
+};
+
 // Mapeia snake_case do DB para camelCase do Frontend
 const mapAluno = (row: any) => ({
   id: row.id,
@@ -123,7 +141,7 @@ router.post('/aulas', async (req: AuthRequest, res) => {
     await pool.query(
       `INSERT INTO aulas (id, aluno_id, data, data_atualizacao, presente, anotacoes, repertorio, gerada_automaticamente, recorrencia_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [id, alunoId, data, dataAtualizacao, presente, anotacoes, repertorio, geradaAutomaticamente || false, recorrenciaId]
+      [id, alunoId, data, dataAtualizacao, presente, anotacoes, normalizeRepertorio(repertorio), geradaAutomaticamente || false, recorrenciaId]
     );
     res.status(204).send();
   } catch (err: any) {
@@ -169,7 +187,7 @@ router.post('/aulas/batch', async (req: AuthRequest, res) => {
         aula.dataAtualizacao, 
         aula.presente, 
         aula.anotacoes, 
-        aula.repertorio, 
+        normalizeRepertorio(aula.repertorio), 
         aula.geradaAutomaticamente || false, 
         aula.recorrenciaId
       );
@@ -248,7 +266,7 @@ router.put('/aulas/:id', async (req: AuthRequest, res) => {
        WHERE au.id = $5 
          AND au.aluno_id = al.id 
          AND al.professor_id = $6`,
-      [presente, anotacoes, repertorio, dataAtualizacao || new Date(), req.params.id, professorId]
+      [presente, anotacoes, normalizeRepertorio(repertorio), dataAtualizacao || new Date(), req.params.id, professorId]
     );
     
     if (result.rowCount === 0) return res.status(404).json({ error: 'Aula não encontrada' });
