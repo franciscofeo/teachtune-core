@@ -598,6 +598,17 @@ const CalendarGrid: React.FC<{
   );
 };
 
+// Helper: Convert UTC date to local datetime-local format (YYYY-MM-DDTHH:mm)
+const toLocalDateTimeString = (dateString: string): string => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 // Internal component for the Lesson Modal
 interface LessonModalProps {
   isOpen: boolean;
@@ -614,7 +625,7 @@ const LessonModal: React.FC<LessonModalProps> = ({ isOpen, onClose, initialData,
   const [formData, setFormData] = useState({
     alunoId: initialData?.alunoId || '',
     data: initialData?.data 
-      ? new Date(initialData.data).toISOString().slice(0, 16) // Convert to YYYY-MM-DDTHH:mm for input
+      ? toLocalDateTimeString(initialData.data) // Use local timezone
       : '',
     anotacoes: initialData?.anotacoes || '',
     repertorioInput: initialData?.repertorio && Array.isArray(initialData.repertorio) 
@@ -634,7 +645,7 @@ const LessonModal: React.FC<LessonModalProps> = ({ isOpen, onClose, initialData,
        setFormData(prev => ({
          ...prev,
          alunoId: initialData.alunoId || '',
-         data: initialData.data ? new Date(initialData.data).toISOString().slice(0, 16) : '',
+         data: initialData.data ? toLocalDateTimeString(initialData.data) : '',
          anotacoes: initialData.anotacoes || '',
          repertorioInput: initialData.repertorio && Array.isArray(initialData.repertorio)
            ? initialData.repertorio.join(', ')
@@ -645,6 +656,7 @@ const LessonModal: React.FC<LessonModalProps> = ({ isOpen, onClose, initialData,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Send datetime-local value directly (browser already has it in local timezone)
     onSave({
       ...formData,
       repertorio: formData.repertorioInput.split(',').map(s => s.trim()).filter(Boolean)
